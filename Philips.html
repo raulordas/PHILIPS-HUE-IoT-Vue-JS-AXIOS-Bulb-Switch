@@ -1,0 +1,96 @@
+<html>
+<head>
+<title>LUZ DE PRUEBA</title>
+<meta charset="utf-8">
+<script src="http://unpkg.com/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<link rel="stylesheet" type="text/css" href="css/estilos.css"/>
+</head>
+<body>
+<div id="app" class="cont">
+<h1>LUZ DE PRUEBA</h1><br>
+<img v-bind:src="imagen" class="imgporche"></img><br><br>
+<input type="submit" v-on:click="encender" value="ENCENDER LUZ" class="btnform"/>
+<input type="submit" v-on:click="apagar" value="APAGAR LUZ" class="btnform"/><br><br>
+<h3>{{estado}}</h3>
+<h5>Conectividad con el hub: {{reachable}}<h5>
+</div>
+</body>
+<script>
+var vue = new Vue({
+	el: '#app',
+	
+	data:{
+		reachable: '',
+		imagen: 'assets/APAGADA.JPG',
+		
+		estado: '',
+		
+		state: {
+			on: false
+		}
+	},
+	
+	mounted () {
+		this.obtener()
+	},
+	
+	
+	methods: {
+		
+		encender : 
+			function() {
+				this.$data.state.on = true;
+				this.$data.imagen = 'assets/ENCENDIDA.JPG';
+				axios.put('http://192.168.1.35/api/XmMO2IhTcQeQTjfsgEaxCtO4kxSCexIrGqB7khCt/lights/58/state', this.$data.state)
+				
+				.then(response=> {
+					response = this.data
+				})
+				
+				.catch(error=> {
+					alert("No se ha podido apagar la luz")
+				})
+			},
+			
+		apagar : 
+			function() {
+				this.$data.state.on = false;
+				this.$data.imagen = 'assets/APAGADA.JPG';
+				axios.put('http://192.168.1.35/api/XmMO2IhTcQeQTjfsgEaxCtO4kxSCexIrGqB7khCt/lights/58/state', this.$data.state)
+				
+				.then(response=> {
+					response = this.data
+				})
+				
+				.catch(error=> {
+					alert("No se ha podido apagar la luz")
+				})
+			},	
+		
+		obtener: function () {
+
+			setInterval(()=> {
+				axios.get('http://192.168.1.35/api/XmMO2IhTcQeQTjfsgEaxCtO4kxSCexIrGqB7khCt/lights/58')
+				
+				.then(response=> {
+					this.reachable = response.data.state.reachable;
+					if(response.data.state.on == true){
+						this.estado = 'LA LUZ ESTÁ ENCENDIDA'
+						this.$data.imagen = 'assets/ENCENDIDA.JPG';
+					} else {
+						this.estado = 'LA LUZ ESTÁ APAGADA'
+						this.$data.imagen = 'assets/APAGADA.JPG';
+					}
+				})
+				
+				.catch(error=> {
+					alert("No se ha podido acceder al estado")
+				})
+			}, 1000);
+		}
+	}
+})
+</script>
+</body>
+</html>
